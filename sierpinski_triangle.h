@@ -3,10 +3,17 @@ private:
     sierpinski_triangle *childs[3];
     bool            isFull = false;
     float           vertices[30];
+    float           thickness = 0.03f;
     glm::vec4       color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    unsigned int indices[6] = {
+    unsigned int    indices[24] = {
         0, 1, 2, // first triangle
-        3, 4, 5  // second triangle
+        3, 4, 5, // second triangle
+        0, 3, 5,
+        2, 5, 0,
+        1, 4, 2,
+        2, 5, 4,
+        0, 3, 1,
+        1, 4, 3
     };
     unsigned int    VBO, VAO, EBO;;
     unsigned int    shaderProgram = glCreateProgram();
@@ -53,28 +60,28 @@ void sierpinski_triangle::divide(){
 
         color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); 
         float verticess_1[30] = {
-            vertices[0],vertices[1] , 0.25f, 0.0f, 0.0f, // left original
-            _1_xf      , _1_yf      , 0.25f, 0.0f, 0.0f, // right = (1)
-            _2_xf      , _2_yf      , 0.25f, 0.0f, 0.0f, // top = (2)
-            vertices[0],vertices[1] ,-0.25f, 0.0f, 0.0f, // left original
-            _1_xf      , _1_yf      ,-0.25f, 0.0f, 0.0f, // right = (1)
-            _2_xf      , _2_yf      ,-0.25f, 0.0f, 0.0f  // top = (2)    
+            vertices[0],vertices[1] , thickness, 0.0f, 0.0f, // left original
+            _1_xf      , _1_yf      , thickness, 0.0f, 0.0f, // right = (1)
+            _2_xf      , _2_yf      , thickness, 0.0f, 0.0f, // top = (2)
+            vertices[0],vertices[1] ,-thickness, 0.0f, 0.0f, // left original
+            _1_xf      , _1_yf      ,-thickness, 0.0f, 0.0f, // right = (1)
+            _2_xf      , _2_yf      ,-thickness, 0.0f, 0.0f  // top = (2)    
         };
         float verticess_2[30] = {
-            _1_xf      , _1_yf       , 0.25f, 0.0f, 0.0f, // left = (1)
-            vertices[5],vertices[6]  , 0.25f, 0.0f, 0.0f, // right original
-            _3_xf      , _3_yf       , 0.25f, 0.0f, 0.0f, // top = (3)
-            _1_xf      , _1_yf       ,-0.25f, 0.0f, 0.0f, // left = (1)
-            vertices[5],vertices[6]  ,-0.25f, 0.0f, 0.0f, // right original
-            _3_xf      , _3_yf       ,-0.25f, 0.0f, 0.0f  // top = (3)
+            _1_xf      , _1_yf       , thickness, 0.0f, 0.0f, // left = (1)
+            vertices[5],vertices[6]  , thickness, 0.0f, 0.0f, // right original
+            _3_xf      , _3_yf       , thickness, 0.0f, 0.0f, // top = (3)
+            _1_xf      , _1_yf       ,-thickness, 0.0f, 0.0f, // left = (1)
+            vertices[5],vertices[6]  ,-thickness, 0.0f, 0.0f, // right original
+            _3_xf      , _3_yf       ,-thickness, 0.0f, 0.0f  // top = (3)
         }; 
         float verticess_3[30] = {
-            _2_xf      , _2_yf       , 0.25f, 0.0f, 0.0f, // left = (2)
-            _3_xf      , _3_yf       , 0.25f, 0.0f, 0.0f, // right  = (3)
-            vertices[10],vertices[11], 0.25f, 0.0f, 0.0f, // top original
-            _2_xf      , _2_yf       ,-0.25f, 0.0f, 0.0f, // left = (2)
-            _3_xf      , _3_yf       ,-0.25f, 0.0f, 0.0f, // right  = (3)
-            vertices[10],vertices[11],-0.25f, 0.0f, 0.0f  // top original
+            _2_xf      , _2_yf       , thickness, 0.0f, 0.0f, // left = (2)
+            _3_xf      , _3_yf       , thickness, 0.0f, 0.0f, // right  = (3)
+            vertices[10],vertices[11], thickness, 0.0f, 0.0f, // top original
+            _2_xf      , _2_yf       ,-thickness, 0.0f, 0.0f, // left = (2)
+            _3_xf      , _3_yf       ,-thickness, 0.0f, 0.0f, // right  = (3)
+            vertices[10],vertices[11],-thickness, 0.0f, 0.0f  // top original
         }; 
 
         childs[0]=new sierpinski_triangle(verticess_1); //left
@@ -200,7 +207,7 @@ void sierpinski_triangle::render(glm::mat4 model, glm::mat4 view, glm::mat4 proj
         glUniform4f(vertexColorLocation, color[0], color[1], color[2], 1.0f);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
     }
 }
 
