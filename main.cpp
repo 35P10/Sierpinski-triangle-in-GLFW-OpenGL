@@ -64,6 +64,7 @@ int main()
     }; 
 	glm::vec3 color = glm::vec3(0.0f, 1.0f, 1.0f);
     sierpinski_triangle *sierpinski = new sierpinski_triangle(vertices);
+	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
 
 	//instrucciones
 	std::cout<<"Actions\n====================\n";
@@ -81,15 +82,51 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// create transformations
-        glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
         glm::mat4 view          = glm::mat4(1.0f);
         glm::mat4 projection    = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
         view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         sierpinski->render(color,model,view,projection);
 		sierpinski->input(window);
+
+		//animation
+		//----------------------------
+		////rotation
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			model = glm::rotate(model, (float)glm::radians(0.1), glm::vec3(0.0f, 1.0f, 0.0f));
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			model = glm::rotate(model, (float)glm::radians(-0.1), glm::vec3(0.0f, 1.0f, 0.0f));
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			model = glm::rotate(model, (float)glm::radians(0.1), glm::vec3(1.0f, 0.0f, 0.0f));
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			model = glm::rotate(model, (float)glm::radians(-0.1), glm::vec3(1.0f, 0.0f, 0.0f));
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+			model = glm::rotate(model, (float)glm::radians(0.1), glm::vec3(0.0f, 0.0f, 1.0f));
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+			model = glm::rotate(model, (float)glm::radians(-0.1), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		//translation
+		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+			model = (glm::translate(glm::mat4(1.0f), glm::vec3(0.001f, 0.0f, 0.0f))  * model);
+		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+			model = (glm::translate(glm::mat4(1.0f), glm::vec3(-0.001f, 0.0f, 0.0f)) * model);
+		if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+			model = (glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.001f , 0.0f)) * model);
+		if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+			model = (glm::translate(glm::mat4(1.0f), glm::vec3(0.0f,-0.001f , 0.0f)) * model);
+
+		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+			model = glm::translate(model, glm::vec3(0.001f, 0.0f, 0.0f));
+		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+			model = glm::translate(model, glm::vec3(-0.001f, 0.0f, 0.0f));
+		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+			model = glm::translate(model, glm::vec3(0.0f, 0.001f , 0.0f));
+		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+			model = glm::translate(model, glm::vec3(0.0f,-0.001f , 0.0f));
+
+		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+			model = glm::mat4(1.0f);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -109,7 +146,6 @@ int main()
 void processInput(GLFWwindow *window){
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-	
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

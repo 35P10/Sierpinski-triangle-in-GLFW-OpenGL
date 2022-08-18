@@ -233,7 +233,7 @@ void sierpinski_triangle::render(glm::vec3 _color,glm::mat4 model, glm::mat4 vie
 
 
 void sierpinski_triangle::input(GLFWwindow* window){
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
         this->divide();
 }
 
