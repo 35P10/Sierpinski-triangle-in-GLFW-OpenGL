@@ -18,7 +18,7 @@ public:
     sierpinski_triangle(float new_vertices[30],glm::vec4 new_color);
     ~sierpinski_triangle();
     void divide();
-    void render();
+    void render(glm::mat4 model, glm::mat4 view, glm::mat4 projection);
     void input(GLFWwindow*);
 };
 
@@ -119,9 +119,12 @@ void sierpinski_triangle::setVertices(float new_vertices[30]){
 bool sierpinski_triangle::compileShader() {
     const char* vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "uniform mat4 model;\n"
+    "uniform mat4 view;\n"
+    "uniform mat4 projection;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
     "}\0";
 
     const char* fragmentShaderSource = "#version 330 core\n"
@@ -174,14 +177,25 @@ bool sierpinski_triangle::compileShader() {
     return true;
 }
 
-void sierpinski_triangle::render(){
+void sierpinski_triangle::render(glm::mat4 model, glm::mat4 view, glm::mat4 projection){
     if(isFull){
         for(int i=0;i<3;i++)
-            childs[i]->render();
+            childs[i]->render(model,view,projection);
     }
     else {
         glUseProgram(shaderProgram);
 
+        //transform
+        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+        unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        //color
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         glUniform4f(vertexColorLocation, color[0], color[1], color[2], 1.0f);
 
