@@ -47,10 +47,13 @@ int main()
 		return -1;
 	}
 
-    float vertices[9] = {
-        -0.5f, -0.5f, 0.0f, // left  
-         0.5f, -0.5f, 0.0f, // right 
-         0.0f,  0.5f, 0.0f  // top   
+    float vertices[30] = {
+        -0.5f, -0.5f, 0.25f, 0.0f, 0.0f, // left
+         0.5f, -0.5f, 0.25f, 0.0f, 0.0f, // right 
+         0.0f,  0.5f, 0.25f, 0.0f, 0.0f, // top   
+		-0.5f, -0.5f,-0.25f, 0.0f, 0.0f, // left  
+         0.5f, -0.5f,-0.25f, 0.0f, 0.0f, // right 
+         0.0f,  0.5f,-0.25f, 0.0f, 0.0f  // top   
     }; 
 
 	glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
