@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <vector>
+#include <queue>
 #include <iostream>
 #include "sierpinski_triangle.h"
 
@@ -47,6 +49,10 @@ int main()
 		return -1;
 	}
 
+	glEnable(GL_DEPTH_TEST);
+	
+	// object
+	// ---------
 	float thickness = 0.03f;
     float vertices[30] = {
         -0.8f, -0.8f, thickness, 0.0f, 0.0f, // left
@@ -56,9 +62,7 @@ int main()
          0.8f, -0.8f,-thickness, 0.0f, 0.0f, // right 
          0.0f,  0.8f,-thickness, 0.0f, 0.0f  // top   
     }; 
-
-	glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
-
+	glm::vec3 color = glm::vec3(0.0f, 1.0f, 1.0f);
     sierpinski_triangle *sierpinski = new sierpinski_triangle(vertices);
 
 	//instrucciones
@@ -74,7 +78,7 @@ int main()
 		// render
 		// ------
         glClearColor(0.062f, 0.0f, 0.168f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// create transformations
         glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
@@ -84,7 +88,7 @@ int main()
         view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-        sierpinski->render(model,view,projection);
+        sierpinski->render(color,model,view,projection);
 		sierpinski->input(window);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

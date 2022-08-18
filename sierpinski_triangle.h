@@ -4,10 +4,9 @@ private:
     bool            isFull = false;
     float           vertices[30];
     float           thickness = 0.03f;
-    glm::vec4       color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     unsigned int    indices[24] = {
-        0, 1, 2, // first triangle
-        3, 4, 5, // second triangle
+        0, 1, 2,
+        3, 4, 5, 
         0, 3, 5,
         2, 5, 0,
         1, 4, 2,
@@ -17,25 +16,20 @@ private:
     };
     unsigned int    VBO, VAO, EBO;;
     unsigned int    shaderProgram = glCreateProgram();
-    
+    std::deque<glm::vec3> childs_colors;
+    int             color_speed_transition = 0;
     bool compileShader();
-    void setVertices(float new_vertices[30]); 
+    void setVertices(float new_vertices[30]);
+    std::deque<glm::vec3> generate_color(int n);
 public:
     sierpinski_triangle(float new_vertices[30]);
-    sierpinski_triangle(float new_vertices[30],glm::vec4 new_color);
     ~sierpinski_triangle();
     void divide();
-    void render(glm::mat4 model, glm::mat4 view, glm::mat4 projection);
+    void render(glm::vec3 color, glm::mat4 model, glm::mat4 view, glm::mat4 projection);
     void input(GLFWwindow*);
 };
 
 sierpinski_triangle::sierpinski_triangle(float new_vertices[30]){
-    compileShader();
-    setVertices(new_vertices);
-}
-
-sierpinski_triangle::sierpinski_triangle(float new_vertices[30],glm::vec4 new_color){
-    color = new_color;
     compileShader();
     setVertices(new_vertices);
 }
@@ -58,7 +52,11 @@ void sierpinski_triangle::divide(){
         float _3_xf = (vertices[10]+vertices[5])/2;
         float _3_yf = (vertices[11]+vertices[6])/2;
 
-        color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); 
+        //Color de triangulo central
+        //color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); 
+        
+        childs_colors = generate_color(3);
+
         float verticess_1[30] = {
             vertices[0],vertices[1] , thickness, 0.0f, 0.0f, // left original
             _1_xf      , _1_yf      , thickness, 0.0f, 0.0f, // right = (1)
@@ -184,14 +182,26 @@ bool sierpinski_triangle::compileShader() {
     return true;
 }
 
-void sierpinski_triangle::render(glm::mat4 model, glm::mat4 view, glm::mat4 projection){
+void sierpinski_triangle::render(glm::vec3 _color,glm::mat4 model, glm::mat4 view, glm::mat4 projection){
     if(isFull){
         for(int i=0;i<3;i++)
-            childs[i]->render(model,view,projection);
-    }
-    else {
-        glUseProgram(shaderProgram);
+            childs[i]->render(childs_colors[i],model,view,projection);
 
+        //velocidad de gradiente
+        // ------
+        if (color_speed_transition == 200) {
+            childs_colors.push_back(childs_colors.front());
+            childs_colors.pop_front();
+            color_speed_transition = 0;
+        }
+        color_speed_transition++;
+    }
+    else {     
+        glPolygonOffset(1,1);
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+
+        glUseProgram(shaderProgram);
         //transform
         unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -204,10 +214,20 @@ void sierpinski_triangle::render(glm::mat4 model, glm::mat4 view, glm::mat4 proj
 
         //color
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        glUniform4f(vertexColorLocation, color[0], color[1], color[2], 1.0f);
+        glUniform4f(vertexColorLocation, _color[0], _color[1], _color[2], 1.0f);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+
+        //color
+        glUniform4f(vertexColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+    
     }
 }
 
@@ -215,4 +235,30 @@ void sierpinski_triangle::render(glm::mat4 model, glm::mat4 view, glm::mat4 proj
 void sierpinski_triangle::input(GLFWwindow* window){
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         this->divide();
+}
+
+
+//creacion de gradiente
+std::deque<glm::vec3> sierpinski_triangle::generate_color(int n_triangles = 2) {
+    std::deque <glm::vec3> colors;
+
+    float start_color_r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float start_color_g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float start_color_b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+    float end_color_r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float end_color_g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float end_color_b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+    float distance_r = (end_color_r- start_color_r)  / n_triangles;
+    float distance_g = (end_color_g- start_color_g) / n_triangles;
+    float distance_b = (end_color_b- start_color_b) / n_triangles;
+
+    for (int i = 0; i < n_triangles; i++) {
+        colors.push_back(glm::vec3(start_color_r, start_color_g, start_color_b));
+        start_color_r += distance_r;
+        start_color_g += distance_g;
+        start_color_b += distance_b;
+    }
+    return colors;
 }
