@@ -90,8 +90,25 @@ int main()
 
 	//instrucciones
 	std::cout<<"Actions\n====================\n";
-	std::cout<<"D Key: Subdivide\n";
-
+	std::cout<<"M Key: Subdivide\n";
+	std::cout<<"====================";
+	std::cout<<"\nRotation\n====================\n";
+	std::cout<<"W Key: X Rotate\n";
+	std::cout<<"S Key: X Rotate\n";
+	std::cout<<"A Key: Y Rotate\n";
+	std::cout<<"D Key: Y Rotate\n";
+	std::cout<<"====================";
+	std::cout<<"\nTranslation\n====================\n";
+	std::cout<<"T Key: X Translation\n";
+	std::cout<<"G Key: X Translation\n";
+	std::cout<<"F Key: Y Translation\n";
+	std::cout<<"H Key: Y Translation\n";
+	std::cout<<"====================";
+	std::cout<<"\nLocal Translation\n====================\n";
+	std::cout<<"I Key: X Translation\n";
+	std::cout<<"K Key: X Translation\n";
+	std::cout<<"J Key: Y Translation\n";
+	std::cout<<"L Key: Y Translation\n";
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window)){
