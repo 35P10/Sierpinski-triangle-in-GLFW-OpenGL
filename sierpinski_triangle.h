@@ -14,13 +14,18 @@ private:
         0, 3, 1,
         1, 4, 3
     };
-    unsigned int    VBO, VAO, EBO;;
+
+    unsigned int    VBO, VAO, EBO;
     unsigned int    shaderProgram = glCreateProgram();
     std::deque<glm::vec3> childs_colors;
     int             color_speed_transition = 0;
+    std::deque<glm::vec3> generate_color(int n);
+    //glm::mat4       transform = glm::mat4(1.0f);
+    glm::mat4 transform = glm::rotate(glm::mat4(1.0f), glm::radians(0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
     bool compileShader();
     void setVertices(float new_vertices[30]);
-    std::deque<glm::vec3> generate_color(int n);
+    void setRotation(float rot_grades, glm::vec3 rot_vect);
+
 public:
     sierpinski_triangle(float new_vertices[30]);
     ~sierpinski_triangle();
@@ -40,7 +45,7 @@ void sierpinski_triangle::divide(){
             childs[i]->divide();
     }
     else {
-        
+
         //float vertices[9] = {left_original, right_original, top_original}
         //(1) middle 0f left original and right original
         float _1_xf = (vertices[0]+vertices[5])/2;
@@ -124,12 +129,13 @@ void sierpinski_triangle::setVertices(float new_vertices[30]){
 bool sierpinski_triangle::compileShader() {
     const char* vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "uniform mat4 transform; \n"
     "uniform mat4 model;\n"
     "uniform mat4 view;\n"
     "uniform mat4 projection;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+    "   gl_Position = projection * view * model * transform * vec4(aPos, 1.0);\n"
     "}\0";
 
     const char* fragmentShaderSource = "#version 330 core\n"
@@ -203,6 +209,9 @@ void sierpinski_triangle::render(glm::vec3 _color,glm::mat4 model, glm::mat4 vie
 
         glUseProgram(shaderProgram);
         //transform
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+        
         unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -235,6 +244,18 @@ void sierpinski_triangle::render(glm::vec3 _color,glm::mat4 model, glm::mat4 vie
 void sierpinski_triangle::input(GLFWwindow* window){
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
         this->divide();
+    //if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+     //   this->setRotation(-0.01, glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+void sierpinski_triangle::setRotation(float rot_grades, glm::vec3 rot_vect) {
+    if(this->isFull){
+        for(int i=0;i<3;i++)
+            childs[i]->setRotation(rot_grades, rot_vect);
+    }
+    else {
+        transform = glm::rotate(transform, glm::radians(rot_grades), rot_vect);
+    }
 }
 
 
